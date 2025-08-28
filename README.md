@@ -74,63 +74,89 @@ make build && make install
 ### Basic Usage
 
 ```bash
-# Convert .env in current directory
+# Convert .env in current directory (JSON to stdout + clipboard)
 env2json
 
-# Specify input file
-env2json --input .env.production
-env2json --input /path/to/.env
+# Convert specific .env file  
+env2json -input .env.production
+env2json -input /path/to/.env
 
-# Save output to file
-env2json --output secrets.json
-env2json --input .env.prod --output prod-secrets.json
+# Save output to file (no clipboard)
+env2json -output secrets.json
+env2json -input .env.prod -output prod-secrets.json
 ```
 
 ### Examples
 
-#### Convert local .env file
+#### Convert local .env file (output to console + clipboard)
 ```bash
 $ env2json
-✅ Successfully converted .env to JSON (5 variables):
-
 {
   "API_KEY": "abc123def456",
   "DATABASE_URL": "postgresql://user:pass@localhost:5432/mydb",
   "NODE_ENV": "development",
   "PORT": "3000",
-  "SECRET_KEY": "mysecretkey"
+  "DEBUG": "true"
 }
-
-📋 JSON copied to clipboard! Ready to paste into AWS Secrets Manager or other services.
-💡 To save to file instead: env2json --output secrets.json
-
-📋 Variables found:
-   API_KEY: [MASKED]
-   DATABASE_URL: postgresql://user:pass@localhost:5432/mydb
-   NODE_ENV: development
-   PORT: 3000
-   SECRET_KEY: [MASKED]
+# ↑ JSON automatically copied to clipboard!
 ```
 
-#### Save to file for AWS import
+#### Convert specific .env file
 ```bash
-$ env2json --output aws-secrets.json
-✅ Successfully converted .env to JSON and saved to aws-secrets.json (5 variables)
+$ env2json -input .env.production
+{
+  "API_SECRET": "prod_secret_key",
+  "DATABASE_URL": "postgresql://prod-server:5432/app",
+  "ENVIRONMENT": "production"
+}
 ```
 
-#### Import specific environment file
+#### Save to file instead of clipboard
 ```bash
-$ env2json --input .env.production --output prod-secrets.json
-✅ Successfully converted .env.production to JSON and saved to prod-secrets.json (8 variables)
+$ env2json -output secrets.json
+Saved to secrets.json (5 variables)
+
+$ cat secrets.json
+{
+  "API_KEY": "abc123def456",
+  "DATABASE_URL": "postgresql://user:pass@localhost:5432/mydb",
+  "NODE_ENV": "development",
+  "PORT": "3000",
+  "DEBUG": "true"
+}
+```
+
+#### Error handling examples
+```bash
+$ env2json
+No .env file found in current directory.
+Use --input flag to specify a different .env file:
+  env2json --input /path/to/.env
+  env2json --input .env.production
+
+$ env2json -input nonexistent.env  
+File not found: nonexistent.env
 ```
 
 ### AWS Secrets Manager Integration
 
-After generating the JSON file, you can import it directly into AWS Secrets Manager:
+#### Method 1: Direct clipboard paste (recommended)
+```bash
+# Convert .env and copy to clipboard
+env2json
 
+# Then paste directly in AWS Console Secrets Manager
+# Or use AWS CLI with clipboard:
+aws secretsmanager create-secret \
+  --name "my-app-secrets" \
+  --secret-string "$(pbpaste)"  # macOS
+  # --secret-string "$(xclip -o)"  # Linux
+```
+
+#### Method 2: File-based import
 ```bash
 # Generate secrets file
-env2json --output secrets.json
+env2json -output secrets.json
 
 # Import to AWS Secrets Manager
 aws secretsmanager create-secret \
@@ -138,56 +164,135 @@ aws secretsmanager create-secret \
   --secret-string file://secrets.json
 ```
 
-## Error Handling
+### Other Cloud Services
 
-The tool provides helpful error messages and suggestions:
-
+#### Kubernetes Secrets
 ```bash
-$ env2json
-❌ No .env file found in current directory.
-💡 Use --input flag to specify a different .env file:
-   env2json --input /path/to/.env
-   env2json --input .env.production
+# Convert and create k8s secret
+env2json | kubectl create secret generic my-app-secrets --from-file=/dev/stdin
+
+# Or save to file first
+env2json -output secrets.json
+kubectl create secret generic my-app-secrets --from-file=secrets.json
 ```
 
-## Build Commands
+#### Azure Key Vault
+```bash
+env2json -output secrets.json
+az keyvault secret set --vault-name MyKeyVault --name app-secrets --file secrets.json
+```
+
+## Troubleshooting
+
+### PATH Issues
+If `env2json` command is not found after installation:
+
+```bash
+# Check if binary exists
+ls -la ~/.local/bin/env2json  # Linux
+ls -la ~/bin/env2json         # macOS
+
+# Add to PATH manually
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc  # Linux
+echo 'export PATH="$HOME/bin:$PATH"' >> ~/.zshrc         # macOS
+
+# Reload shell
+source ~/.bashrc  # or ~/.zshrc
+```
+
+### Clipboard Issues
+If clipboard doesn't work:
+- **macOS**: Should work out of the box
+- **Linux**: Install `xclip` or `xsel`: `sudo apt install xclip`
+- **Windows WSL**: Install `clip` (usually pre-installed)
+
+### Common Issues
+```bash
+# Empty .env file
+$ env2json
+The .env file is empty or contains no valid environment variables.
+
+# Permission denied
+$ env2json -input /etc/secrets.env
+Error reading .env file: open /etc/secrets.env: permission denied
+```
+
+## Development
+
+### Build Commands
 
 ```bash
 # Build for current platform
 make build
 
-# Build for all platforms
+# Build for all platforms  
 make build-all
 
 # Run tests
 make test
 
-# Install locally
+# Install locally (OS-specific directory)
 make install
 
 # Clean build files
 make clean
+
+# Run locally
+make run ARGS="-help"
+make run ARGS="-input .env.test"
 ```
 
-## Security Features
+### Project Structure
+```
+env2json/
+├── main.go              # Main CLI application
+├── main_test.go         # Unit tests  
+├── go.mod              # Go module definition
+├── Makefile            # Build automation
+├── install.sh          # Installation script
+├── LICENSE             # MIT license
+├── README.md           # This file
+├── .github/workflows/  # GitHub Actions CI/CD
+└── build/              # Generated binaries
+```
 
-- Automatically detects and masks sensitive environment variables in preview output
-- Variables containing keywords like `password`, `secret`, `key`, `token`, etc. are masked as `[MASKED]`
-- JSON output contains actual values (needed for secrets managers)
+## Security
+
+- **Clean output**: Only outputs JSON, no sensitive data leaked in logs
+- **No network calls**: Purely local processing
+- **No data storage**: Doesn't save or cache any environment data
+- **Clipboard only**: Sensitive data only goes to clipboard (user controlled)
 
 ## Supported .env Format
 
-The tool supports standard `.env` file format:
+The tool supports standard `.env` file format with robust parsing:
 
 ```env
 # Comments are ignored
 DATABASE_URL=postgresql://user:pass@localhost:5432/mydb
-API_KEY=abc123def456
+
+# Quoted values (quotes are automatically removed)
+API_KEY="abc123def456"
+JWT_SECRET='super-secret-key'
+
+# Unquoted values
 PORT=3000
+DEBUG=true
 
 # Empty lines are ignored
-NODE_ENV=production
+
+# Complex values
+REDIS_URL=redis://username:password@redis-server:6379/0
+ALLOWED_HOSTS=localhost,127.0.0.1,myapp.com
 ```
+
+### Parsing Features
+- ✅ **Comments**: Lines starting with `#` are ignored
+- ✅ **Empty lines**: Automatically skipped  
+- ✅ **Quoted values**: Single and double quotes removed
+- ✅ **Complex values**: URLs, comma-separated lists, etc.
+- ✅ **Whitespace**: Automatically trimmed
+- ✅ **Invalid lines**: Gracefully skipped
 
 ## License
 
