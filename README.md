@@ -21,8 +21,13 @@
 ### Quick Install (Recommended)
 
 ```bash
-# One-line install script (macOS/Linux)
+# One-line install script (macOS/Linux) - configures PATH automatically
 curl -sSL https://raw.githubusercontent.com/gbretas/env2json/main/install.sh | bash
+```
+
+```bash
+# After installation, you can use immediately:
+env2json -help
 ```
 
 ### Download Pre-built Binaries
