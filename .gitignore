@@ -1,0 +1,26 @@
+# Binaries
+build/
+env2json
+*.exe
+
+# Go
+*.so
+*.dylib
+*.dll
+*.test
+*.out
+
+# Test files
+*.env.test
+test-output.json
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

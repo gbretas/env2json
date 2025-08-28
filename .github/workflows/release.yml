@@ -1,0 +1,111 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+    
+    - name: Install dependencies
+      run: go mod download
+    
+    - name: Run tests
+      run: go test -v ./...
+    
+    - name: Build binaries
+      run: |
+        # Create build directory
+        mkdir -p build
+        
+        # Build for all platforms
+        CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -trimpath -o build/env2json-linux-amd64 .
+        CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags "-s -w" -trimpath -o build/env2json-linux-arm64 .
+        CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags "-s -w" -trimpath -o build/env2json-darwin-amd64 .
+        CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -ldflags "-s -w" -trimpath -o build/env2json-darwin-arm64 .
+        CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags "-s -w" -trimpath -o build/env2json-windows-amd64.exe .
+        
+        # Make binaries executable
+        chmod +x build/env2json-*
+    
+    - name: Test binaries
+      run: |
+        echo "TEST_VAR=test_value" > .env
+        ./build/env2json-linux-amd64 > test-output.json
+        cat test-output.json
+        # Verify JSON is valid
+        cat test-output.json | jq empty
+    
+    - name: Create checksums
+      run: |
+        cd build
+        sha256sum * > checksums.txt
+        cat checksums.txt
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          build/env2json-linux-amd64
+          build/env2json-linux-arm64
+          build/env2json-darwin-amd64
+          build/env2json-darwin-arm64
+          build/env2json-windows-amd64.exe
+          build/checksums.txt
+        body: |
+          ## 🚀 env2json ${{ github.ref_name }}
+          
+          Convert `.env` files to JSON format for AWS Secrets Manager and other secrets management services.
+          
+          ### 📥 Downloads
+          
+          Choose the appropriate binary for your platform:
+          
+          - **macOS (Apple Silicon)**: `env2json-darwin-arm64`
+          - **macOS (Intel)**: `env2json-darwin-amd64`
+          - **Linux (x64)**: `env2json-linux-amd64`
+          - **Linux (ARM64)**: `env2json-linux-arm64`
+          - **Windows WSL**: `env2json-windows-amd64.exe`
+          
+          ### 🔧 Installation
+          
+          ```bash
+          # Download and make executable (example for macOS ARM64)
+          curl -L -o env2json https://github.com/gbretas/env2json/releases/download/${{ github.ref_name }}/env2json-darwin-arm64
+          chmod +x env2json
+          sudo mv env2json /usr/local/bin/
+          ```
+          
+          ### 📋 Usage
+          
+          ```bash
+          # Convert .env to JSON (copies to clipboard automatically)
+          env2json
+          
+          # Specify different input file
+          env2json -input .env.production
+          
+          # Save to file
+          env2json -output secrets.json
+          ```
+          
+          ### 🔍 What's New
+          
+          - Ultra-lightweight binaries (~2MB, pure stdlib)
+          - Automatic clipboard copying
+          - Cross-platform support
+          - Clean JSON output
+        draft: false
+        prerelease: false
