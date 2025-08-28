@@ -46,24 +46,42 @@ curl -L -o env2json "$LATEST_URL"
 # Make executable
 chmod +x env2json
 
-# Create ~/.local/bin if it doesn't exist
-mkdir -p "$HOME/.local/bin"
+# Determine install directory based on OS
+case $OS in
+    darwin)
+        # macOS standard: ~/bin
+        INSTALL_DIR="$HOME/bin"
+        SHELL_CONFIG="~/.zshrc"
+        if [[ "$SHELL" == *"bash"* ]]; then
+            SHELL_CONFIG="~/.bash_profile"
+        fi
+        ;;
+    linux)
+        # Linux standard: ~/.local/bin (XDG spec)
+        INSTALL_DIR="$HOME/.local/bin"
+        SHELL_CONFIG="~/.bashrc"
+        if [[ "$SHELL" == *"zsh"* ]]; then
+            SHELL_CONFIG="~/.zshrc"
+        fi
+        ;;
+esac
 
-# Install to ~/.local/bin
-mv env2json "$HOME/.local/bin/"
-echo "✅ env2json installed to $HOME/.local/bin/"
+# Create install directory
+mkdir -p "$INSTALL_DIR"
 
-# Check if ~/.local/bin is in PATH
-if [[ ":$PATH:" == *":$HOME/.local/bin:"* ]]; then
-    echo "✅ $HOME/.local/bin is already in your PATH"
+# Install binary
+mv env2json "$INSTALL_DIR/"
+echo "✅ env2json installed to $INSTALL_DIR/"
+
+# Check if install directory is in PATH
+if [[ ":$PATH:" == *":$INSTALL_DIR:"* ]]; then
+    echo "✅ $INSTALL_DIR is already in your PATH"
 else
-    echo "💡 Add $HOME/.local/bin to your PATH by adding this line to your shell config:"
-    echo "   export PATH=\"\$HOME/.local/bin:\$PATH\""
+    echo "💡 Add $INSTALL_DIR to your PATH by adding this line to $SHELL_CONFIG:"
+    echo "   export PATH=\"$INSTALL_DIR:\$PATH\""
     echo ""
-    echo "   For bash: echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.bashrc"
-    echo "   For zsh:  echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.zshrc"
-    echo ""
-    echo "   Then restart your terminal or run: source ~/.bashrc (or ~/.zshrc)"
+    echo "   Run: echo 'export PATH=\"$INSTALL_DIR:\$PATH\"' >> $SHELL_CONFIG"
+    echo "   Then restart your terminal or run: source $SHELL_CONFIG"
 fi
 
 # Test installation

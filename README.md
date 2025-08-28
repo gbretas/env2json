@@ -30,19 +30,19 @@ curl -sSL https://raw.githubusercontent.com/gbretas/env2json/main/install.sh | b
 Download the appropriate binary for your platform from the [releases page](https://github.com/gbretas/env2json/releases):
 
 ```bash
-# macOS (Apple Silicon)
+# macOS (Apple Silicon) - instala em ~/bin (padrão macOS)
 curl -L -o env2json https://github.com/gbretas/env2json/releases/latest/download/env2json-darwin-arm64
-chmod +x env2json && mkdir -p ~/.local/bin && mv env2json ~/.local/bin/
+chmod +x env2json && mkdir -p ~/bin && mv env2json ~/bin/
 
-# macOS (Intel)  
+# macOS (Intel) - instala em ~/bin (padrão macOS)
 curl -L -o env2json https://github.com/gbretas/env2json/releases/latest/download/env2json-darwin-amd64
-chmod +x env2json && mkdir -p ~/.local/bin && mv env2json ~/.local/bin/
+chmod +x env2json && mkdir -p ~/bin && mv env2json ~/bin/
 
-# Linux (x64)
+# Linux (x64) - instala em ~/.local/bin (padrão XDG)
 curl -L -o env2json https://github.com/gbretas/env2json/releases/latest/download/env2json-linux-amd64
 chmod +x env2json && mkdir -p ~/.local/bin && mv env2json ~/.local/bin/
 
-# Linux (ARM64)
+# Linux (ARM64) - instala em ~/.local/bin (padrão XDG)
 curl -L -o env2json https://github.com/gbretas/env2json/releases/latest/download/env2json-linux-arm64
 chmod +x env2json && mkdir -p ~/.local/bin && mv env2json ~/.local/bin/
 
@@ -61,14 +61,12 @@ make build
 ### Install Globally
 
 ```bash
-# Build and install to ~/.local/bin
-make build
-mkdir -p ~/.local/bin
-cp build/env2json ~/.local/bin/
+# Build and install (uses OS-specific standard directory)
+make build && make install
 
-# Add to PATH (if not already there)
-echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc  # or ~/.bashrc
-source ~/.zshrc  # or ~/.bashrc
+# macOS: instala em ~/bin
+# Linux: instala em ~/.local/bin
+# Siga as instruções para adicionar ao PATH se necessário
 ```
 
 ## Usage

@@ -49,14 +49,25 @@ build-darwin:
 build-windows:
 	${BUILD_FLAGS} GOOS=windows GOARCH=amd64 go build ${LDFLAGS} -o ${BUILD_DIR}/${BINARY_NAME}-windows-amd64.exe .
 
-# Install locally
+# Install locally (OS-specific directories)
 .PHONY: install
 install: build
+	@echo "🔧 Installing for $(shell uname -s)..."
+ifeq ($(shell uname -s),Darwin)
+	# macOS: use ~/bin
+	mkdir -p ~/bin
+	cp ${BUILD_DIR}/${BINARY_NAME} ~/bin/
+	@echo "✅ env2json installed to ~/bin/"
+	@echo "💡 Make sure ~/bin is in your PATH:"
+	@echo "   export PATH=\"\$$HOME/bin:\$$PATH\""
+else
+	# Linux: use ~/.local/bin (XDG standard)
 	mkdir -p ~/.local/bin
 	cp ${BUILD_DIR}/${BINARY_NAME} ~/.local/bin/
 	@echo "✅ env2json installed to ~/.local/bin/"
 	@echo "💡 Make sure ~/.local/bin is in your PATH:"
 	@echo "   export PATH=\"\$$HOME/.local/bin:\$$PATH\""
+endif
 
 # Test
 .PHONY: test
