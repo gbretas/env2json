@@ -46,14 +46,24 @@ curl -L -o env2json "$LATEST_URL"
 # Make executable
 chmod +x env2json
 
-# Install to /usr/local/bin
-if [ -w /usr/local/bin ]; then
-    mv env2json /usr/local/bin/
-    echo "✅ env2json installed to /usr/local/bin/"
+# Create ~/bin if it doesn't exist
+mkdir -p "$HOME/bin"
+
+# Install to ~/bin
+mv env2json "$HOME/bin/"
+echo "✅ env2json installed to $HOME/bin/"
+
+# Check if ~/bin is in PATH
+if [[ ":$PATH:" == *":$HOME/bin:"* ]]; then
+    echo "✅ $HOME/bin is already in your PATH"
 else
-    echo "🔐 Installing to /usr/local/bin/ (requires sudo):"
-    sudo mv env2json /usr/local/bin/
-    echo "✅ env2json installed to /usr/local/bin/"
+    echo "💡 Add $HOME/bin to your PATH by adding this line to your shell config:"
+    echo "   export PATH=\"\$HOME/bin:\$PATH\""
+    echo ""
+    echo "   For bash: echo 'export PATH=\"\$HOME/bin:\$PATH\"' >> ~/.bashrc"
+    echo "   For zsh:  echo 'export PATH=\"\$HOME/bin:\$PATH\"' >> ~/.zshrc"
+    echo ""
+    echo "   Then restart your terminal or run: source ~/.bashrc (or ~/.zshrc)"
 fi
 
 # Test installation

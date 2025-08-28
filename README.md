@@ -32,19 +32,19 @@ Download the appropriate binary for your platform from the [releases page](https
 ```bash
 # macOS (Apple Silicon)
 curl -L -o env2json https://github.com/gbretas/env2json/releases/latest/download/env2json-darwin-arm64
-chmod +x env2json && sudo mv env2json /usr/local/bin/
+chmod +x env2json && mkdir -p ~/bin && mv env2json ~/bin/
 
-# macOS (Intel)
+# macOS (Intel)  
 curl -L -o env2json https://github.com/gbretas/env2json/releases/latest/download/env2json-darwin-amd64
-chmod +x env2json && sudo mv env2json /usr/local/bin/
+chmod +x env2json && mkdir -p ~/bin && mv env2json ~/bin/
 
 # Linux (x64)
 curl -L -o env2json https://github.com/gbretas/env2json/releases/latest/download/env2json-linux-amd64
-chmod +x env2json && sudo mv env2json /usr/local/bin/
+chmod +x env2json && mkdir -p ~/bin && mv env2json ~/bin/
 
 # Linux (ARM64)
 curl -L -o env2json https://github.com/gbretas/env2json/releases/latest/download/env2json-linux-arm64
-chmod +x env2json && sudo mv env2json /usr/local/bin/
+chmod +x env2json && mkdir -p ~/bin && mv env2json ~/bin/
 
 # Windows WSL
 curl -L -o env2json.exe https://github.com/gbretas/env2json/releases/latest/download/env2json-windows-amd64.exe
@@ -61,11 +61,14 @@ make build
 ### Install Globally
 
 ```bash
-# Build and install to /usr/local/bin
-make install
+# Build and install to ~/bin
+make build
+mkdir -p ~/bin
+cp build/env2json ~/bin/
 
-# Or manually copy binary
-cp build/env2json /usr/local/bin/
+# Add to PATH (if not already there)
+echo 'export PATH="$HOME/bin:$PATH"' >> ~/.zshrc  # or ~/.bashrc
+source ~/.zshrc  # or ~/.bashrc
 ```
 
 ## Usage
