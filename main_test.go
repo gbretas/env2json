@@ -36,29 +36,7 @@ func TestFileExists(t *testing.T) {
 	}
 }
 
-func TestIsSensitiveKey(t *testing.T) {
-	testCases := []struct {
-		key      string
-		expected bool
-	}{
-		{"DATABASE_PASSWORD", true},
-		{"API_SECRET", true},
-		{"JWT_TOKEN", true},
-		{"PRIVATE_KEY", true},
-		{"AUTH_CREDENTIAL", true},
-		{"DATABASE_URL", false},
-		{"PORT", false},
-		{"NODE_ENV", false},
-		{"DEBUG", false},
-	}
-
-	for _, tc := range testCases {
-		result := isSensitiveKey(tc.key)
-		if result != tc.expected {
-			t.Errorf("isSensitiveKey(%s) = %v, expected %v", tc.key, result, tc.expected)
-		}
-	}
-}
+// Removed TestIsSensitiveKey since we removed the function for optimization
 
 func TestEnvToJSONConversion(t *testing.T) {
 	// Create temporary .env file
