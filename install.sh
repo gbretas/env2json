@@ -46,22 +46,22 @@ curl -L -o env2json "$LATEST_URL"
 # Make executable
 chmod +x env2json
 
-# Create ~/bin if it doesn't exist
-mkdir -p "$HOME/bin"
+# Create ~/.local/bin if it doesn't exist
+mkdir -p "$HOME/.local/bin"
 
-# Install to ~/bin
-mv env2json "$HOME/bin/"
-echo "✅ env2json installed to $HOME/bin/"
+# Install to ~/.local/bin
+mv env2json "$HOME/.local/bin/"
+echo "✅ env2json installed to $HOME/.local/bin/"
 
-# Check if ~/bin is in PATH
-if [[ ":$PATH:" == *":$HOME/bin:"* ]]; then
-    echo "✅ $HOME/bin is already in your PATH"
+# Check if ~/.local/bin is in PATH
+if [[ ":$PATH:" == *":$HOME/.local/bin:"* ]]; then
+    echo "✅ $HOME/.local/bin is already in your PATH"
 else
-    echo "💡 Add $HOME/bin to your PATH by adding this line to your shell config:"
-    echo "   export PATH=\"\$HOME/bin:\$PATH\""
+    echo "💡 Add $HOME/.local/bin to your PATH by adding this line to your shell config:"
+    echo "   export PATH=\"\$HOME/.local/bin:\$PATH\""
     echo ""
-    echo "   For bash: echo 'export PATH=\"\$HOME/bin:\$PATH\"' >> ~/.bashrc"
-    echo "   For zsh:  echo 'export PATH=\"\$HOME/bin:\$PATH\"' >> ~/.zshrc"
+    echo "   For bash: echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.bashrc"
+    echo "   For zsh:  echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.zshrc"
     echo ""
     echo "   Then restart your terminal or run: source ~/.bashrc (or ~/.zshrc)"
 fi

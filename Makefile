@@ -52,11 +52,11 @@ build-windows:
 # Install locally
 .PHONY: install
 install: build
-	mkdir -p ~/bin
-	cp ${BUILD_DIR}/${BINARY_NAME} ~/bin/
-	@echo "✅ env2json installed to ~/bin/"
-	@echo "💡 Make sure ~/bin is in your PATH:"
-	@echo "   export PATH=\"\$$HOME/bin:\$$PATH\""
+	mkdir -p ~/.local/bin
+	cp ${BUILD_DIR}/${BINARY_NAME} ~/.local/bin/
+	@echo "✅ env2json installed to ~/.local/bin/"
+	@echo "💡 Make sure ~/.local/bin is in your PATH:"
+	@echo "   export PATH=\"\$$HOME/.local/bin:\$$PATH\""
 
 # Test
 .PHONY: test
