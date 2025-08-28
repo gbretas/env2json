@@ -109,7 +109,7 @@ else
     export PATH="$INSTALL_DIR:$PATH"
 fi
 
-# Test installation
+# Test installation in current session
 echo "🧪 Testing installation..."
 if command -v env2json >/dev/null 2>&1; then
     env2json -help
@@ -117,10 +117,33 @@ if command -v env2json >/dev/null 2>&1; then
     echo "🎉 Installation successful!"
     echo "💡 You can now use 'env2json' from anywhere!"
 else
-    echo "⚠️  Installation completed, but you may need to restart your terminal"
-    echo "   or run: source $ACTUAL_CONFIG"
+    echo ""
+    echo "✅ Installation completed successfully!"
+    echo ""
+    echo "🔄 **IMPORTANT: You need to restart your terminal or reload your shell:**"
+    echo ""
+    case $OS in
+        darwin)
+            echo "   Option 1 (Quick): source ~/.zshrc"
+            echo "   Option 2 (Recommended): Restart Terminal.app completely"
+            echo "   Option 3: Open new terminal tab/window"
+            ;;
+        linux)
+            if [[ "$SHELL" == *"zsh"* ]]; then
+                echo "   Option 1 (Quick): source ~/.zshrc"
+            else
+                echo "   Option 1 (Quick): source ~/.bashrc"
+            fi
+            echo "   Option 2 (Recommended): Close and reopen terminal"
+            echo "   Option 3: Open new terminal tab"
+            ;;
+    esac
+    echo ""
+    echo "💡 After restarting, test with: env2json -help"
 fi
 
 echo ""
-echo "🎉 Installation complete!"
-echo "💡 Usage: env2json (in any directory with .env file)"
+echo "📋 Usage examples:"
+echo "   env2json                    # Convert .env to JSON + clipboard"
+echo "   env2json -input .env.prod   # Convert specific file"
+echo "   env2json -output secrets.json  # Save to file"
