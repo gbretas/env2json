@@ -140,7 +140,18 @@ File not found: nonexistent.env
 
 ### AWS Secrets Manager Integration
 
-#### Method 1: Direct clipboard paste (recommended)
+#### Method 1: File-based import (recommended)
+```bash
+# Generate secrets file
+env2json -output secrets.json
+
+# Import to AWS Secrets Manager
+aws secretsmanager create-secret \
+  --name "my-app-secrets" \
+  --secret-string file://secrets.json
+```
+
+#### Method 2: Direct clipboard paste
 ```bash
 # Convert .env and copy to clipboard
 env2json
@@ -151,17 +162,6 @@ aws secretsmanager create-secret \
   --name "my-app-secrets" \
   --secret-string "$(pbpaste)"  # macOS
   # --secret-string "$(xclip -o)"  # Linux
-```
-
-#### Method 2: File-based import
-```bash
-# Generate secrets file
-env2json -output secrets.json
-
-# Import to AWS Secrets Manager
-aws secretsmanager create-secret \
-  --name "my-app-secrets" \
-  --secret-string file://secrets.json
 ```
 
 ### Other Cloud Services
