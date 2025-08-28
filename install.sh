@@ -77,16 +77,49 @@ echo "✅ env2json installed to $INSTALL_DIR/"
 if [[ ":$PATH:" == *":$INSTALL_DIR:"* ]]; then
     echo "✅ $INSTALL_DIR is already in your PATH"
 else
-    echo "💡 Add $INSTALL_DIR to your PATH by adding this line to $SHELL_CONFIG:"
-    echo "   export PATH=\"$INSTALL_DIR:\$PATH\""
-    echo ""
-    echo "   Run: echo 'export PATH=\"$INSTALL_DIR:\$PATH\"' >> $SHELL_CONFIG"
-    echo "   Then restart your terminal or run: source $SHELL_CONFIG"
+    echo "🔧 Adding $INSTALL_DIR to your PATH..."
+    
+    # Determine actual shell config file
+    case $OS in
+        darwin)
+            if [[ "$SHELL" == *"bash"* ]]; then
+                ACTUAL_CONFIG="$HOME/.bash_profile"
+            else
+                ACTUAL_CONFIG="$HOME/.zshrc"
+            fi
+            ;;
+        linux)
+            if [[ "$SHELL" == *"zsh"* ]]; then
+                ACTUAL_CONFIG="$HOME/.zshrc"
+            else
+                ACTUAL_CONFIG="$HOME/.bashrc"
+            fi
+            ;;
+    esac
+    
+    # Add to PATH if not already there
+    if ! grep -q "export PATH.*$INSTALL_DIR" "$ACTUAL_CONFIG" 2>/dev/null; then
+        echo "export PATH=\"$INSTALL_DIR:\$PATH\"" >> "$ACTUAL_CONFIG"
+        echo "✅ Added $INSTALL_DIR to $ACTUAL_CONFIG"
+    else
+        echo "✅ $INSTALL_DIR already configured in $ACTUAL_CONFIG"
+    fi
+    
+    # Update current session PATH
+    export PATH="$INSTALL_DIR:$PATH"
 fi
 
 # Test installation
 echo "🧪 Testing installation..."
-env2json -help
+if command -v env2json >/dev/null 2>&1; then
+    env2json -help
+    echo ""
+    echo "🎉 Installation successful!"
+    echo "💡 You can now use 'env2json' from anywhere!"
+else
+    echo "⚠️  Installation completed, but you may need to restart your terminal"
+    echo "   or run: source $ACTUAL_CONFIG"
+fi
 
 echo ""
 echo "🎉 Installation complete!"
